@@ -379,3 +379,13 @@ section{padding:92px 0}
 .ftr .hours .row,.ftr .hours .row+.row,.ftr .hours .row.today{background:transparent!important;border:0;border-radius:0;padding:5px 0;color:#e7eaf2}
 .ftr .hours .row.today b::after{display:none}
 .ftr .hours .row,.ftr .hours .row:nth-child(odd),.ftr .hours .row.today,.ftr .hours .row:first-child{padding:5px 0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+
+/* ===== stránka zaměstnanců: karty ===== */
+.team{display:grid;gap:18px;max-width:720px}
+.member{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 26px;border:1px solid var(--line);border-radius:var(--r);background:var(--cream)}
+.member h2{font-size:1.5rem;margin:0 0 4px}
+.member p{margin:0;color:var(--muted);font-weight:600}
+.member .avatar{width:96px;height:96px;border-radius:50%;object-fit:cover;flex:none;border:3px solid #fff;box-shadow:0 0 0 1px var(--line)}
+[data-c-staff]:empty,[data-c-staff]:has(p:only-child:empty){display:none}
+[data-c-staff]{margin-top:30px}
+@media (max-width:480px){.member{padding:16px}.member .avatar{width:72px;height:72px}.member h2{font-size:1.25rem}}

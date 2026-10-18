@@ -726,25 +726,25 @@ window.GALAXIE_SCHEMA = {
   },
   {
    "key": "sluzby1_img",
-   "label": "Služby: Zlato a šperky",
+   "label": "Služby: Hodinky",
    "type": "image",
-   "default": "img/sluzby-zlato.jpg",
+   "default": "img/sluzby-hodinky.jpg",
    "tab": "fotky",
    "section": "Fotky"
   },
   {
    "key": "sluzby2_img",
-   "label": "Služby: Elektronika",
+   "label": "Služby: Šperky",
    "type": "image",
-   "default": "img/sluzby-elektronika.jpg",
+   "default": "img/sluzby-sperky.jpg",
    "tab": "fotky",
    "section": "Fotky"
   },
   {
    "key": "sluzby3_img",
-   "label": "Služby: Hudební nástroje",
+   "label": "Služby: Elektronika",
    "type": "image",
-   "default": "img/sluzby-nastroje.jpg",
+   "default": "img/sluzby-klavesnice.jpg",
    "tab": "fotky",
    "section": "Fotky"
   },
@@ -752,7 +752,23 @@ window.GALAXIE_SCHEMA = {
    "key": "sluzby4_img",
    "label": "Služby: Nářadí",
    "type": "image",
-   "default": "img/sluzby-naradi.jpg",
+   "default": "img/sluzby-vrtacka.jpg",
+   "tab": "fotky",
+   "section": "Fotky"
+  },
+  {
+   "key": "zam1_img",
+   "label": "Zaměstnanec 1 – profilová fotka",
+   "type": "image",
+   "default": "img/avatar.svg",
+   "tab": "fotky",
+   "section": "Fotky"
+  },
+  {
+   "key": "zam2_img",
+   "label": "Zaměstnanec 2 – profilová fotka",
+   "type": "image",
+   "default": "img/avatar.svg",
    "tab": "fotky",
    "section": "Fotky"
   },
@@ -806,14 +822,46 @@ window.GALAXIE_SCHEMA = {
    "help": "Stránka je veřejná na adrese /zamestnanci/, ale není nikde na webu odkazovaná. Najde ji každý, kdo zná adresu (nebo ji najde Google). Nedávej sem hesla ani citlivé údaje."
   },
   {
-   "key": "zam_body",
-   "label": "Obsah stránky",
-   "type": "textarea",
-   "default": "Obsah doplníme.",
+   "key": "zam1_name",
+   "label": "Zaměstnanec 1 – jméno",
+   "type": "text",
+   "default": "Peter Fabian",
    "tab": "zamestnanci",
-   "section": "Stránka pro zaměstnance",
-   "rows": 18,
-   "help": "Odstavce odděl prázdným řádkem. Odrážky začni znakem „- “. **tučně**, [text odkazu](https://adresa)."
+   "section": "Zaměstnanec 1"
+  },
+  {
+   "key": "zam1_city",
+   "label": "Zaměstnanec 1 – město",
+   "type": "text",
+   "default": "Trutnov",
+   "tab": "zamestnanci",
+   "section": "Zaměstnanec 1"
+  },
+  {
+   "key": "zam2_name",
+   "label": "Zaměstnanec 2 – jméno",
+   "type": "text",
+   "default": "Mgr. Adriana Dolinská",
+   "tab": "zamestnanci",
+   "section": "Zaměstnanec 2"
+  },
+  {
+   "key": "zam2_city",
+   "label": "Zaměstnanec 2 – město",
+   "type": "text",
+   "default": "Prešov",
+   "tab": "zamestnanci",
+   "section": "Zaměstnanec 2"
+  },
+  {
+   "key": "zam_body",
+   "label": "Doplňující text pod kartami (nepovinné)",
+   "type": "textarea",
+   "default": "",
+   "tab": "zamestnanci",
+   "section": "Doplňující text",
+   "rows": 8,
+   "help": "Prázdné = nezobrazí se. Odstavce odděl prázdným řádkem. Fotky zaměstnanců se nahrávají v sekci Fotky."
   }
  ],
  "tabs": [
