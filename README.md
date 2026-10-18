@@ -7,7 +7,8 @@ Hosting: GitHub Pages. Repozitář: `filipfabian922/galaxie-web`.
 | Cesta | Co to je |
 |---|---|
 | `index.html`, `o-nas/`, `sluzby/`, `kontakt/`, `ochrana-osobnich-udaju/` | stránky webu |
-| `404.html` | chybová stránka; zároveň obsluhuje **skrytou stránku zaměstnanců** (adresa je jen v databázi) |
+| `404.html` | chybová stránka |
+| `zamestnanci/` | veřejná, ale nelinkovaná stránka pro zaměstnance (obsah se edituje v administraci) |
 | `admin/` | administrace (přihlášení e-mailem a heslem) |
 | `assets/css/style.css`, `assets/js/site.js` | vzhled a chování webu |
 | `assets/js/config.js` | adresa Supabase a veřejný klíč |

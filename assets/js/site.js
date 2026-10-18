@@ -82,8 +82,17 @@
   function renderHours() {
     var map = hoursMap(), now = pragueNow();
     $$("[data-hours]").forEach(function (box) {
-      box.innerHTML = DAYS.filter(function (d) { return map[d[0]].trim(); }).map(function (d) {
-        return '<div class="row' + (DAYS.indexOf(d) === now.day ? " today" : "") + '"><b>' + d[1].slice(0, 2) + "</b><span>" + esc(map[d[0]]) + "</span></div>";
+      var groups = [];
+      DAYS.forEach(function (d, i) {
+        var v = (map[d[0]] || "").replace(/\s+/g, " ").trim(); if (!v) return;
+        var g = groups[groups.length - 1];
+        if (g && g.v === v && g.z === i - 1) g.z = i; else groups.push({ a: i, z: i, v: v });
+      });
+      box.innerHTML = groups.map(function (g) {
+        var label = g.a === g.z ? DAYS[g.a][1] : DAYS[g.a][1] + " – " + DAYS[g.z][1];
+        var rs = g.v.match(/\d{1,2}[:.]\d{2}\s*[-–—]\s*\d{1,2}[:.]\d{2}/g);
+        var chips = rs ? rs.map(function (r) { return '<i class="chip">' + esc(r) + "</i>"; }).join("") : '<i class="chip txt">' + esc(g.v) + "</i>";
+        return '<div class="row' + (now.day >= g.a && now.day <= g.z ? " today" : "") + '"><b>' + esc(label) + '</b><span class="chips">' + chips + "</span></div>";
       }).join("");
     });
     $$("[data-hours-note]").forEach(function (el) { el.textContent = has("hours_note") ? content.hours_note : ""; });
@@ -163,18 +172,6 @@
     var img = $(".hero-img");
     if (img && !reduce) window.addEventListener("scroll", function () { if (window.scrollY < 900) img.style.translate = "0 " + window.scrollY * .18 + "px"; }, { passive: true });
   }
-  function starfield() {
-    var c = $(".hero canvas"); if (!c || reduce) return;
-    var x = c.getContext("2d"), w, h, S = [], raf;
-    function size() { w = c.width = c.offsetWidth; h = c.height = c.offsetHeight; S = []; var n = Math.min(90, Math.round(w * h / 14000)); for (var i = 0; i < n; i++) S.push({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.4 + .3, p: Math.random() * 6.28, s: Math.random() * .02 + .005, v: Math.random() * .12 + .02 }); }
-    function draw() {
-      x.clearRect(0, 0, w, h);
-      S.forEach(function (s) { s.p += s.s; s.y -= s.v; if (s.y < -2) { s.y = h + 2; s.x = Math.random() * w; } x.globalAlpha = .25 + .55 * Math.abs(Math.sin(s.p)); x.fillStyle = s.r > 1.1 ? "#f4d98a" : "#fff"; x.beginPath(); x.arc(s.x, s.y, s.r, 0, 6.28); x.fill(); });
-      raf = requestAnimationFrame(draw);
-    }
-    size(); draw(); window.addEventListener("resize", size);
-    document.addEventListener("visibilitychange", function () { if (document.hidden) cancelAnimationFrame(raf); else draw(); });
-  }
   function lightbox() {
     var links = $$(".gallery a"); if (!links.length) return;
     var lb = document.createElement("div"); lb.className = "lb"; lb.innerHTML = '<button type="button" aria-label="Zavřít">×</button><img alt="">'; document.body.appendChild(lb);
@@ -195,7 +192,7 @@
   }
 
   /* ---------- start ---------- */
-  header(); starfield(); lightbox(); reveal(); renderHours();
+  header(); lightbox(); reveal(); renderHours();
   setInterval(renderHours, 60000);
   load().then(function () { applyContent(); banner(); track(); });
 })();

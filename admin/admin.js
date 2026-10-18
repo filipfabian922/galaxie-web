@@ -61,7 +61,7 @@
     app.appendChild(h("div", { class: "shell" }, side, panel));
     app.appendChild(h("div", { class: "savebar" + (dirty() ? " show" : ""), id: "savebar" }, h("span", { id: "savecount", text: dirty() + " neuložených změn" }),
       h("button", { class: "btn", onclick: discard, text: "Zahodit" }), h("button", { class: "btn primary", id: "savebtn", onclick: save, text: "Uložit a zveřejnit" })));
-    if (tab === "prehled") statsPanel(panel); else if (tab === "zamestnanci") staffPanel(panel); else if (tab === "ucet") accountPanel(panel); else if (tab === "fotky") photosPanel(panel); else formPanel(panel);
+    if (tab === "prehled") statsPanel(panel); else if (tab === "ucet") accountPanel(panel); else if (tab === "fotky") photosPanel(panel); else formPanel(panel);
   }
   function updateBar() {
     var b = $("#savebar"); if (!b) return; b.classList.toggle("show", dirty() > 0); $("#savecount").textContent = dirty() + " neuložených změn";
@@ -104,7 +104,7 @@
   function formPanel(panel) {
     var t = TABS.filter(function (x) { return x[0] === tab; })[0];
     panel.appendChild(h("h2", { text: t[1] }));
-    var lede = { oznameni: "Lišta s oznámením se zobrazí nahoře na každé stránce – třeba sleva, výprodej nebo změna otevírací doby. Když ji vypneš, z webu zmizí.", uvod: "Texty na úvodní stránce. Fotky se mění v sekci Fotky.", onas: "Texty podstránky O nás.", sluzby: "Texty podstránky Služby.", kontakt: "Telefon, e-mail, adresa, odkazy na sítě a otevírací doba – změna se projeví na celém webu najednou (i v patičce)." }[tab];
+    var lede = { oznameni: "Lišta s oznámením se zobrazí nahoře na každé stránce – třeba sleva, výprodej nebo změna otevírací doby. Když ji vypneš, z webu zmizí.", uvod: "Texty na úvodní stránce. Fotky se mění v sekci Fotky.", onas: "Texty podstránky O nás.", zamestnanci: "Stránka je veřejná na adrese /zamestnanci/, ale není nikde na webu odkazovaná. Kdo adresu zná (nebo ji najde Google), stránku uvidí.", sluzby: "Texty podstránky Služby.", kontakt: "Telefon, e-mail, adresa, odkazy na sítě a otevírací doba – změna se projeví na celém webu najednou (i v patičce)." }[tab];
     if (lede) panel.appendChild(h("p", { class: "lede", text: lede }));
     if (tab === "oznameni") panel.appendChild(h("div", { class: "card" }, h("h3", { text: "Náhled" }), h("div", { id: "bar-prev" })));
     var sections = []; FIELDS.filter(function (f) { return f.tab === tab; }).forEach(function (f) { if (sections.indexOf(f.section) < 0) sections.push(f.section); });
@@ -195,28 +195,6 @@
       options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false }, plugins: { legend: { position: "bottom" } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { ticks: { maxTicksLimit: 8 } } } } });
   }
 
-
-  /* ---------- skrytá stránka zaměstnanců ---------- */
-  function staffUrl(slug) { return new URL("../" + slug + "/", location.href).href; }
-  function staffPanel(panel) {
-    panel.appendChild(h("h2", { text: "Zaměstnanci" }));
-    panel.appendChild(h("p", { class: "lede", text: "Skrytá stránka bez odkazu z webu a bez zápisu ve vyhledávačích. Otevře se jen na tajné adrese – ta i obsah jsou uložené v databázi, ne v kódu webu." }));
-    var box = h("div", { class: "empty", text: "Načítám…" }); panel.appendChild(box);
-    sb.from("staff_page").select("slug,title,body").eq("id", 1).maybeSingle().then(function (r) {
-      box.className = ""; box.textContent = "";
-      if (r.error || !r.data) { box.appendChild(h("div", { class: "card" }, h("b", { text: "Stránku se nepodařilo načíst." }), h("p", { text: r.error ? r.error.message : "Spusť aktuální supabase/schema.sql." }))); return; }
-      var d = r.data, urlIn = h("input", { readonly: true, value: staffUrl(d.slug) });
-      var title = h("input", { type: "text" }), body = h("textarea", { rows: 18 }); title.value = d.title; body.value = d.body;
-      box.appendChild(h("div", { class: "card" }, h("h3", { text: "Tajná adresa" }),
-        h("div", { class: "copyrow" }, urlIn, h("button", { class: "btn small", onclick: function () { urlIn.select(); (navigator.clipboard ? navigator.clipboard.writeText(urlIn.value) : Promise.reject()).then(function () { toast("Zkopírováno"); }, function () { document.execCommand("copy"); toast("Zkopírováno"); }); }, text: "Kopírovat" }),
-          h("button", { class: "btn small", onclick: function () { if (!confirm("Vygenerovat novou adresu? Stará přestane fungovat.")) return; var n = Array.prototype.map.call(crypto.getRandomValues(new Uint8Array(10)), function (b) { return ("0" + b.toString(16)).slice(-2); }).join(""); sb.from("staff_page").update({ slug: n, updated_at: new Date().toISOString() }).eq("id", 1).then(function (x) { if (x.error) return toast(x.error.message, true); toast("Nová adresa vytvořena."); render(); }); }, text: "Nová adresa" })),
-        h("p", { class: "lede", style: "margin:10px 0 0", text: "Kdo odkaz zná, stránku uvidí. Nedávej na ni hesla ani citlivé osobní údaje." })));
-      box.appendChild(h("div", { class: "card" }, h("h3", { text: "Obsah" }),
-        h("div", { class: "field" }, h("label", { text: "Nadpis stránky" }), title),
-        h("div", { class: "field" }, h("label", { text: "Text" }), body, h("small", { text: "Odstavce odděl prázdným řádkem. Odrážky začni znakem „- “. **tučně**, [text odkazu](https://adresa)." })),
-        h("button", { class: "btn primary", onclick: function () { sb.from("staff_page").update({ title: title.value, body: body.value, updated_at: new Date().toISOString() }).eq("id", 1).then(function (x) { if (x.error) return toast(x.error.message, true); toast("Uloženo."); }); }, text: "Uložit stránku" })));
-    });
-  }
 
   /* ---------- účet a nastavení ---------- */
   function accountPanel(panel) {

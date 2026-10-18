@@ -76,22 +76,6 @@ create policy "img_insert" on storage.objects for insert to authenticated with c
 create policy "img_update" on storage.objects for update to authenticated using (bucket_id = 'site-images' and public.is_admin());
 create policy "img_delete" on storage.objects for delete to authenticated using (bucket_id = 'site-images' and public.is_admin());
 
--- 6) Skrytá stránka zaměstnanců: tajná adresa (slug) a obsah leží v databázi, ne v kódu webu.
---    Veřejnost smí jen zavolat staff_get(slug) – obsah dostane, jen když slug přesně sedí.
-create table if not exists public.staff_page (
-  id int primary key default 1 check (id = 1),
-  slug text not null,
-  title text not null default 'Zaměstnanci',
-  body text not null default 'Obsah doplníme.',
-  updated_at timestamptz not null default now()
-);
-alter table public.staff_page enable row level security;
-drop policy if exists "staff_admin" on public.staff_page;
-create policy "staff_admin" on public.staff_page for all to authenticated using (public.is_admin()) with check (public.is_admin());
-insert into public.staff_page (id, slug) values (1, substr(replace(gen_random_uuid()::text, '-', ''), 1, 20)) on conflict do nothing;
-
-create or replace function public.staff_get(p_slug text) returns json
-language sql stable security definer set search_path = public as $$
-  select json_build_object('title', title, 'body', body) from public.staff_page where id = 1 and slug = p_slug;
-$$;
-grant execute on function public.staff_get(text) to anon, authenticated;
+-- (Dřívější tabulka staff_page a funkce staff_get už se nepoužívají – stránka zaměstnanců je běžná stránka /zamestnanci/.)
+drop function if exists public.staff_get(text);
+drop table if exists public.staff_page;

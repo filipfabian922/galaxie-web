@@ -150,7 +150,7 @@ window.GALAXIE_SCHEMA = {
    "key": "stat4_label",
    "label": "Popisek 4",
    "type": "text",
-   "default": "výplata v hotovosti",
+   "default": "peníze v hotovosti",
    "tab": "uvod",
    "section": "Pruh s čísly (animované počítadlo)"
   },
@@ -776,6 +776,25 @@ window.GALAXIE_SCHEMA = {
    "default": "img/prodejna-4.jpg",
    "tab": "fotky",
    "section": "Fotky"
+  },
+  {
+   "key": "zam_title",
+   "label": "Nadpis stránky",
+   "type": "text",
+   "default": "Zaměstnanci",
+   "tab": "zamestnanci",
+   "section": "Stránka pro zaměstnance",
+   "help": "Stránka je veřejná na adrese /zamestnanci/, ale není nikde na webu odkazovaná. Najde ji každý, kdo zná adresu (nebo ji najde Google). Nedávej sem hesla ani citlivé údaje."
+  },
+  {
+   "key": "zam_body",
+   "label": "Obsah stránky",
+   "type": "textarea",
+   "default": "Obsah doplníme.",
+   "tab": "zamestnanci",
+   "section": "Stránka pro zaměstnance",
+   "rows": 18,
+   "help": "Odstavce odděl prázdným řádkem. Odrážky začni znakem „- “. **tučně**, [text odkazu](https://adresa)."
   }
  ],
  "tabs": [
