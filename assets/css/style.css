@@ -442,3 +442,6 @@ html{overflow-x:clip}
 .ftr .brand b{font-size:1rem}
 @media (max-width:560px){.hdr .brand b{font-size:.8rem;letter-spacing:.04em}.hdr .brand img{width:42px;height:42px}}
 @media (max-width:360px){.hdr .brand b{font-size:.72rem;letter-spacing:.02em}}
+.nf-code{font-family:var(--f-body);font-weight:800;letter-spacing:-.02em}
+.nf .lead{max-width:620px}
+.nf-code{font-weight:500;letter-spacing:-.03em}
