@@ -395,3 +395,5 @@ section{padding:92px 0}
 .member{border:3px solid var(--gold);background:#fff;box-shadow:0 8px 22px rgba(10,16,32,.10);padding:26px 28px}
 .member .avatar{border-color:var(--cream);box-shadow:0 0 0 3px var(--gold)}
 .member h2{font-size:1.6rem}
+.member{border:1.5px solid var(--gold);box-shadow:0 6px 18px rgba(10,16,32,.08)}
+.member .avatar{border:1px solid #b5b0a3;box-shadow:none}
