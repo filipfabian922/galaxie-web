@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Správa webu · Galaxie</title>
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/png" href="../img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div id="app" hidden></div>
+
+<section id="login" class="login">
+  <form id="login-form" class="login-card" autocomplete="on">
+    <img src="../img/logo.png" alt="" width="84" height="84">
+    <h1>Správa webu</h1>
+    <p>Zastavárna, bazar Galaxie</p>
+    <label>E-mail<input type="email" name="email" autocomplete="username" required></label>
+    <label>Heslo<input type="password" name="password" autocomplete="current-password" required></label>
+    <button class="btn primary" type="submit">Přihlásit se</button>
+    <div id="login-err" class="err" role="alert"></div>
+    <a class="back" href="../">← Zpět na web</a>
+  </form>
+</section>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/content-schema.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

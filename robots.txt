@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+
+Sitemap: https://filipfabian922.github.io/galaxie-web/sitemap.xml
