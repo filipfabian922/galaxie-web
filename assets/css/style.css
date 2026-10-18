@@ -371,3 +371,11 @@ section{padding:92px 0}
 /* Služby: jeden řádek se 4 fotkami */
 .svc-photos{grid-template-columns:repeat(4,1fr);max-width:760px}
 @media (max-width:560px){.svc-photos{grid-template-columns:repeat(2,1fr)}}
+.svc-photos{max-width:none;gap:14px}
+@media (max-width:760px){.svc-photos{grid-template-columns:repeat(2,1fr)}}
+
+/* patička: otevírací doba bez rámečku a bez zvýraznění dnešního dne */
+.ftr .hours{background:none;border:0;padding:0}
+.ftr .hours .row,.ftr .hours .row+.row,.ftr .hours .row.today{background:transparent!important;border:0;border-radius:0;padding:5px 0;color:#e7eaf2}
+.ftr .hours .row.today b::after{display:none}
+.ftr .hours .row,.ftr .hours .row:nth-child(odd),.ftr .hours .row.today,.ftr .hours .row:first-child{padding:5px 0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
