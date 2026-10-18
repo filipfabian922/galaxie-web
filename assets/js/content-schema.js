@@ -57,7 +57,7 @@ window.GALAXIE_SCHEMA = {
    "key": "hero_quote",
    "label": "Podnadpis (citace)",
    "type": "text",
-   "default": "\"Jsme tu pro vás už 19 let.\"",
+   "default": "„Jsme tu pro vás už 19 let.“",
    "tab": "uvod",
    "section": "Úvodní obrázek (hero)"
   },
