@@ -757,22 +757,6 @@ window.GALAXIE_SCHEMA = {
    "section": "Fotky"
   },
   {
-   "key": "sluzby5_img",
-   "label": "Služby: Sportovní vybavení",
-   "type": "image",
-   "default": "img/sluzby-sport.jpg",
-   "tab": "fotky",
-   "section": "Fotky"
-  },
-  {
-   "key": "sluzby6_img",
-   "label": "Služby: Bazar – kola, auta, vybavení",
-   "type": "image",
-   "default": "img/sluzby-bazar.jpg",
-   "tab": "fotky",
-   "section": "Fotky"
-  },
-  {
    "key": "gold_img",
    "label": "Sekce zlato (úvod i O nás)",
    "type": "image",

@@ -345,3 +345,29 @@ section{padding:92px 0}
 .gx-flash{outline:3px solid #1d8a4e!important;outline-offset:4px;animation:gxflash 1.6s ease-out 1}
 @keyframes gxflash{0%,60%{background-color:rgba(29,138,78,.25)}100%{background-color:transparent}}
 #gx-tip{position:fixed;z-index:9999;pointer-events:none;background:#111;color:#fff;font:700 12px/1.2 Manrope,system-ui,sans-serif;padding:5px 9px;border-radius:6px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.35);display:none}
+
+/* ===== otevírací doba: jeden rámeček, bez rámečků u jednotlivých řádků ===== */
+.hours{gap:0;padding:6px 8px;background:#fff;border:1px solid var(--line);border-radius:14px}
+.hours .row,.hours .row:nth-child(odd){background:transparent;border:0;border-radius:10px;padding:9px 10px}
+.hours .row+.row{border-top:1px solid var(--line);border-radius:0}
+.hours .row .t{background:transparent;border:0;border-radius:0;padding:0;font-size:1rem}
+.hours .row.today{background:var(--navy);color:#fff;border-color:transparent;border-radius:10px}
+.hours .row.today+.row,.hours .row:has(+.row.today){border-top-color:transparent}
+.hours .row.today .t{background:transparent;border:0;color:#fff}
+.ftr .hours{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14)}
+.ftr .hours .row,.ftr .hours .row:nth-child(odd){background:transparent!important;border:0;padding:7px 8px;color:#e7eaf2}
+.ftr .hours .row+.row{border-top:1px solid rgba(255,255,255,.1)}
+.ftr .hours .row .t{background:transparent;border:0;padding:0;font-size:.88rem;color:#fff}
+.ftr .hours .row.today{background:rgba(212,167,63,.22)!important;border-radius:8px}
+.ftr .hours .row.today+.row,.ftr .hours .row:has(+.row.today){border-top-color:transparent}
+
+/* ===== Služby: menší fotky ===== */
+.svc-photos{grid-template-columns:repeat(3,1fr);gap:12px;max-width:620px;margin:36px 0 34px}
+.svc-photos figure{border-radius:12px;box-shadow:0 4px 14px rgba(10,16,32,.12)}
+
+/* ===== telefonní tlačítko v hlavičce: po najetí zůstane zlaté, jen se rozsvítí ===== */
+.nav a.btn-gold:hover{background:var(--gold-2);color:var(--navy);opacity:1}
+
+/* Služby: jeden řádek se 4 fotkami */
+.svc-photos{grid-template-columns:repeat(4,1fr);max-width:760px}
+@media (max-width:560px){.svc-photos{grid-template-columns:repeat(2,1fr)}}
