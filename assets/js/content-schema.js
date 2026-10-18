@@ -8,7 +8,7 @@ window.GALAXIE_SCHEMA = {
    "default": false,
    "tab": "oznameni",
    "section": "Lišta nahoře na webu",
-   "help": "Lišta se zobrazí jen když je zapnutá A má vyplněný text. Vypnutím zmizí."
+   "help": "Oznámení se zobrazí v černé horní liště (mezi ikonami sítí a kontakty). Zobrazí se jen když je zapnuté A má vyplněný text."
   },
   {
    "key": "banner_text",
@@ -20,26 +20,13 @@ window.GALAXIE_SCHEMA = {
    "ph": "např. Sleva 10 % na všechno zlato do konce měsíce!"
   },
   {
-   "key": "banner_style",
-   "label": "Vzhled lišty",
-   "type": "select",
-   "default": "sale",
+   "key": "banner_color",
+   "label": "Barva lišty",
+   "type": "color",
+   "default": "#d4a73f",
    "tab": "oznameni",
    "section": "Lišta nahoře na webu",
-   "options": [
-    [
-     "sale",
-     "Zlatá – slevy, akce"
-    ],
-    [
-     "info",
-     "Tmavě modrá – informace"
-    ],
-    [
-     "alert",
-     "Červená – důležité upozornění"
-    ]
-   ]
+   "help": "Když není oznámení zapnuté, lišta zůstane černá. Barva textu se přizpůsobí sama."
   },
   {
    "key": "banner_link",
@@ -669,7 +656,7 @@ window.GALAXIE_SCHEMA = {
    "key": "hero_img",
    "label": "Úvodní velká fotka (hero)",
    "type": "image",
-   "default": "img/hero-prodejna.jpg",
+   "default": "img/hero-galerie.jpg",
    "tab": "fotky",
    "section": "Fotky"
   },
@@ -734,6 +721,54 @@ window.GALAXIE_SCHEMA = {
    "label": "Kategorie: Nářadí",
    "type": "image",
    "default": "img/kat-naradi.jpg",
+   "tab": "fotky",
+   "section": "Fotky"
+  },
+  {
+   "key": "sluzby1_img",
+   "label": "Služby: Zlato a šperky",
+   "type": "image",
+   "default": "img/sluzby-zlato.jpg",
+   "tab": "fotky",
+   "section": "Fotky"
+  },
+  {
+   "key": "sluzby2_img",
+   "label": "Služby: Elektronika",
+   "type": "image",
+   "default": "img/sluzby-elektronika.jpg",
+   "tab": "fotky",
+   "section": "Fotky"
+  },
+  {
+   "key": "sluzby3_img",
+   "label": "Služby: Hudební nástroje",
+   "type": "image",
+   "default": "img/sluzby-nastroje.jpg",
+   "tab": "fotky",
+   "section": "Fotky"
+  },
+  {
+   "key": "sluzby4_img",
+   "label": "Služby: Nářadí",
+   "type": "image",
+   "default": "img/sluzby-naradi.jpg",
+   "tab": "fotky",
+   "section": "Fotky"
+  },
+  {
+   "key": "sluzby5_img",
+   "label": "Služby: Sportovní vybavení",
+   "type": "image",
+   "default": "img/sluzby-sport.jpg",
+   "tab": "fotky",
+   "section": "Fotky"
+  },
+  {
+   "key": "sluzby6_img",
+   "label": "Služby: Bazar – kola, auta, vybavení",
+   "type": "image",
+   "default": "img/sluzby-bazar.jpg",
    "tab": "fotky",
    "section": "Fotky"
   },

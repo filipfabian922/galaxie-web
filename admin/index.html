@@ -13,6 +13,10 @@
 </head>
 <body>
 <div id="app" hidden></div>
+<aside id="pv" hidden aria-label="Živý náhled webu">
+  <div class="pv-head"><div class="pv-pages"></div><div class="pv-dev"><button type="button" data-d="desk" title="Zobrazení na počítači">🖥</button><button type="button" data-d="mob" title="Zobrazení na mobilu">📱</button></div></div>
+  <div class="pv-stage"><iframe id="pv-frame" title="Náhled webu" tabindex="-1"></iframe></div>
+</aside>
 
 <section id="login" class="login">
   <form id="login-form" class="login-card" autocomplete="on">

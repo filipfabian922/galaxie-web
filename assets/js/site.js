@@ -6,6 +6,10 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* režim náhledu: stránka běží v rámečku uvnitř administrace (stejný web) a dostává živé změny */
+  var PREVIEW = false;
+  try { PREVIEW = window.parent !== window && /[?&]gxprev=1\b/.test(location.search) && !!window.parent.document; } catch (e) {}
+  if (PREVIEW) { reduce = true; document.documentElement.classList.add("gx-prev"); }
   document.documentElement.classList.remove("no-js");
 
   /* při otevření ze souboru (file://) doplň index.html do odkazů na složky */
@@ -82,17 +86,12 @@
   function renderHours() {
     var map = hoursMap(), now = pragueNow();
     $$("[data-hours]").forEach(function (box) {
-      var groups = [];
-      DAYS.forEach(function (d, i) {
-        var v = (map[d[0]] || "").replace(/\s+/g, " ").trim(); if (!v) return;
-        var g = groups[groups.length - 1];
-        if (g && g.v === v && g.z === i - 1) g.z = i; else groups.push({ a: i, z: i, v: v });
-      });
-      box.innerHTML = groups.map(function (g) {
-        var label = g.a === g.z ? DAYS[g.a][1] : DAYS[g.a][1] + " – " + DAYS[g.z][1];
-        var rs = g.v.match(/\d{1,2}[:.]\d{2}\s*[-–—]\s*\d{1,2}[:.]\d{2}/g);
-        var chips = rs ? rs.map(function (r) { return '<i class="chip">' + esc(r) + "</i>"; }).join("") : '<i class="chip txt">' + esc(g.v) + "</i>";
-        return '<div class="row' + (now.day >= g.a && now.day <= g.z ? " today" : "") + '"><b>' + esc(label) + '</b><span class="chips">' + chips + "</span></div>";
+      box.innerHTML = DAYS.map(function (d, i) {
+        var v = (map[d[0]] || "").replace(/\s+/g, " ").trim(); if (!v) return "";
+        var rs = v.match(/\d{1,2}[:.]\d{2}\s*[-–—]\s*\d{1,2}[:.]\d{2}/g), cells;
+        if (rs) { cells = rs.slice(0, 2).map(function (r) { return '<span class="t">' + esc(r) + "</span>"; }).join("") + (rs.length === 1 ? '<span class="t"></span>' : ""); }
+        else cells = '<span class="t wide">' + esc(v) + "</span>";
+        return '<div class="row' + (now.day === i ? " today" : "") + '" data-k="hours_' + d[0] + '"><b>' + esc(d[1]) + "</b>" + cells + "</div>";
       }).join("");
     });
     $$("[data-hours-note]").forEach(function (el) { el.textContent = has("hours_note") ? content.hours_note : ""; });
@@ -112,22 +111,30 @@
     });
   }
 
-  /* ---------- oznamovací lišta ---------- */
+  /* ---------- oznámení v horní liště ---------- */
+  var LEGACY = { sale: "#d4a73f", info: "#1b2742", alert: "#a3262a" };
+  function textOn(hex) {
+    var m = /^#?([0-9a-f]{6})$/i.exec(hex || ""); if (!m) return "#fff";
+    var n = parseInt(m[1], 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(function (v) { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); });
+    return (.2126 * c[0] + .7152 * c[1] + .0722 * c[2]) > .4 ? "#0a1020" : "#ffffff";
+  }
   function banner() {
-    var el = $("#announce"); if (!el) return;
+    var el = $("#announce"), strip = $("#strip"); if (!el || !strip) return;
+    function off() { strip.classList.remove("has-ann"); strip.style.removeProperty("--ann-bg"); strip.style.removeProperty("--ann-fg"); el.hidden = true; el.innerHTML = ""; }
     var on = content.banner_on === true || content.banner_on === "true";
     var text = has("banner_text") ? String(content.banner_text).trim() : "";
-    if (!on || !text) { el.classList.remove("show"); return; }
+    if (!on || !text) { off(); return; }
     var key = "gal-ann-" + text.length + text.charCodeAt(0) + text.charCodeAt(text.length - 1), closed = false;
-    try { closed = sessionStorage.getItem(key) === "1"; } catch (e) {}
-    if (closed) return;
-    el.dataset.style = content.banner_style || "sale";
+    if (!PREVIEW) { try { closed = sessionStorage.getItem(key) === "1"; } catch (e) {} }
+    if (closed) { off(); return; }
+    var color = has("banner_color") && /^#[0-9a-f]{6}$/i.test(content.banner_color) ? content.banner_color : (LEGACY[content.banner_style] || "#d4a73f");
+    strip.style.setProperty("--ann-bg", color); strip.style.setProperty("--ann-fg", textOn(color));
     var link = has("banner_link") ? safeUrl(content.banner_link) : "";
     var label = has("banner_link_label") && content.banner_link_label ? content.banner_link_label : "Více informací";
-    el.innerHTML = '<span></span>' + (link ? '<a href="' + esc(link) + '">' + esc(label) + "</a>" : "") + '<button type="button" aria-label="Zavřít oznámení">×</button>';
+    el.innerHTML = "<span></span>" + (link ? '<a href="' + esc(link) + '">' + esc(label) + "</a>" : "") + '<button type="button" aria-label="Zavřít oznámení">×</button>';
     el.firstChild.textContent = text;
-    el.classList.add("show");
-    el.querySelector("button").onclick = function () { el.classList.remove("show"); try { sessionStorage.setItem(key, "1"); } catch (e) {} };
+    el.hidden = false; strip.classList.add("has-ann");
+    el.querySelector("button").onclick = function () { off(); if (!PREVIEW) try { sessionStorage.setItem(key, "1"); } catch (e) {} };
   }
 
   /* ---------- načtení dat ---------- */
@@ -192,7 +199,47 @@
   }
 
   /* ---------- start ---------- */
+  /* ---------- náhled v administraci ---------- */
+  function preview() {
+    var labels = {}, hov = null, tip = document.createElement("div"); tip.id = "gx-tip"; document.body.appendChild(tip);
+    var SEL = "[data-k],[data-c],[data-c-p],[data-c-list],[data-c-img],[data-c-href],[data-hours-note],[data-c-map],[data-c-gdpr],[data-c-staff],[data-hours]";
+    function keyOf(n) {
+      return n.getAttribute("data-k") || n.dataset.c || n.dataset.cP || n.dataset.cList || n.dataset.cImg || n.dataset.cHref ||
+        (n.hasAttribute("data-hours-note") ? "hours_note" : n.hasAttribute("data-c-map") ? "map_query" : n.hasAttribute("data-c-gdpr") ? "gdpr_operator" : n.hasAttribute("data-c-staff") ? "zam_body" : n.hasAttribute("data-hours") ? "hours_po" : "");
+    }
+    function clearHover() { if (hov) hov.classList.remove("gx-hover"); hov = null; tip.style.display = "none"; }
+    document.addEventListener("mouseover", function (e) {
+      var n = e.target.closest ? e.target.closest(SEL) : null; if (n === hov) return; clearHover(); if (!n) return;
+      var k = keyOf(n); if (!k) return; hov = n; n.classList.add("gx-hover");
+      var r = n.getBoundingClientRect(); tip.textContent = "✎ " + (labels[k] || k); tip.style.display = "block";
+      tip.style.left = Math.max(4, Math.min(r.left, innerWidth - 270)) + "px"; tip.style.top = Math.max(4, r.top - 28) + "px";
+    });
+    document.addEventListener("mouseleave", clearHover);
+    document.addEventListener("click", function (e) {
+      e.preventDefault(); e.stopPropagation();
+      var n = e.target.closest ? e.target.closest(SEL) : null; if (!n) return; var k = keyOf(n); if (k) parent.postMessage({ type: "gx-focus", key: k }, location.origin);
+    }, true);
+    function findEl(k) {
+      if (/^banner_/.test(k)) return $("#strip");
+      var q = k === "hours_note" ? "[data-hours-note]" : k === "map_query" ? "[data-c-map]" : k === "gdpr_operator" ? "[data-c-gdpr]" : k === "zam_body" ? "[data-c-staff]" : null;
+      var sels = [q, '[data-k="' + k + '"]', '[data-c="' + k + '"]', '[data-c-p="' + k + '"]', '[data-c-list="' + k + '"]', '[data-c-img="' + k + '"]', '[data-c-href="' + k + '"]', /^hours_/.test(k) ? "[data-hours]" : null];
+      for (var i = 0; i < sels.length; i++) { if (!sels[i]) continue; var el = $(sels[i]); if (el) return el; }
+      return null;
+    }
+    function show(k) {
+      var el = findEl(k); if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: /^banner_/.test(k) ? "start" : "center" });
+      el.classList.remove("gx-flash"); void el.offsetWidth; el.classList.add("gx-flash"); setTimeout(function () { el.classList.remove("gx-flash"); }, 1800);
+    }
+    window.addEventListener("message", function (e) {
+      if (e.origin !== location.origin) return; var d = e.data || {};
+      if (d.type === "gx-content") { content = d.content || {}; labels = d.labels || labels; applyContent(); banner(); }
+      else if (d.type === "gx-show") show(d.key);
+    });
+    parent.postMessage({ type: "gx-ready" }, location.origin);
+  }
+
   header(); lightbox(); reveal(); renderHours();
-  setInterval(renderHours, 60000);
-  load().then(function () { applyContent(); banner(); track(); });
+  if (PREVIEW) preview();
+  else { setInterval(renderHours, 60000); load().then(function () { applyContent(); banner(); track(); }); }
 })();

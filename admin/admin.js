@@ -6,6 +6,9 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var app = $("#app"), loginBox = $("#login");
   var values = {}, pending = {}, tab = "prehled", user = null, statDays = 30, chart = null;
+  var PAGES = [["home", "Úvod", "../"], ["onas", "O nás", "../o-nas/"], ["sluzby", "Služby", "../sluzby/"], ["kontakt", "Kontakt", "../kontakt/"], ["zam", "Zaměstnanci", "../zamestnanci/"]];
+  var TABPAGE = { oznameni: "home", uvod: "home", onas: "onas", sluzby: "sluzby", kontakt: "kontakt", fotky: "home", zamestnanci: "zam" };
+  var pvPage = "home", pvDev = "desk", pvReady = false, pvTimer = null, pvBuilt = false;
   var byKey = {}; FIELDS.forEach(function (f) { byKey[f.key] = f; });
 
   function h(tag, attrs) {
@@ -53,18 +56,20 @@
     var side = h("nav", { class: "side", "aria-label": "Sekce" });
     TABS.forEach(function (t) {
       var n = FIELDS.filter(function (f) { return f.tab === t[0] && Object.prototype.hasOwnProperty.call(pending, f.key); }).length;
-      side.appendChild(h("button", { class: tab === t[0] ? "on" : "", onclick: function () { tab = t[0]; render(); window.scrollTo(0, 0); } }, t[1], n ? h("span", { class: "dot", title: "Neuložené změny" }) : null));
+      side.appendChild(h("button", { class: tab === t[0] ? "on" : "", onclick: function () { tab = t[0]; if (TABPAGE[tab]) pvPage = TABPAGE[tab]; render(); window.scrollTo(0, 0); } }, t[1], n ? h("span", { class: "dot", title: "Neuložené změny" }) : null));
     });
     var panel = h("div", { class: "panel" });
     app.appendChild(h("div", { class: "top" }, h("img", { src: "../img/logo.png", alt: "" }), h("b", { text: "Správa webu" }), h("span", { class: "sp" }),
+      h("button", { class: "btn small pv-toggle", onclick: function () { document.body.classList.toggle("pv-open"); layoutPv(); }, text: "👁 Náhled" }),
       h("span", { class: "who", text: user.email }), h("a", { class: "btn small", href: "../", target: "_blank", rel: "noopener", text: "Zobrazit web ↗" }), h("button", { class: "btn small", onclick: logout, text: "Odhlásit" })));
     app.appendChild(h("div", { class: "shell" }, side, panel));
     app.appendChild(h("div", { class: "savebar" + (dirty() ? " show" : ""), id: "savebar" }, h("span", { id: "savecount", text: dirty() + " neuložených změn" }),
       h("button", { class: "btn", onclick: discard, text: "Zahodit" }), h("button", { class: "btn primary", id: "savebtn", onclick: save, text: "Uložit a zveřejnit" })));
     if (tab === "prehled") statsPanel(panel); else if (tab === "ucet") accountPanel(panel); else if (tab === "fotky") photosPanel(panel); else formPanel(panel);
+    updatePv();
   }
   function updateBar() {
-    var b = $("#savebar"); if (!b) return; b.classList.toggle("show", dirty() > 0); $("#savecount").textContent = dirty() + " neuložených změn";
+    var b = $("#savebar"); if (!b) return; b.classList.toggle("show", dirty() > 0); document.body.classList.toggle("has-save", dirty() > 0); $("#savecount").textContent = dirty() + " neuložených změn";
     var side = $(".side"); if (side) { var cur = TABS.map(function (t) { return t[0]; }); Array.prototype.forEach.call(side.children, function (btn, i) {
       var n = FIELDS.filter(function (f) { return f.tab === cur[i] && Object.prototype.hasOwnProperty.call(pending, f.key); }).length, d = $(".dot", btn);
       if (n && !d) btn.appendChild(h("span", { class: "dot" })); if (!n && d) d.remove(); }); }
@@ -83,16 +88,22 @@
   function resetField(f) {
     delete pending[f.key];
     if (!has(f.key)) { render(); return; }
-    sb.from("site_content").delete().eq("key", f.key).then(function (r) { if (r.error) { toast(r.error.message, true); return; } delete values[f.key]; toast("Vráceno na původní text."); render(); });
+    sb.from("site_content").delete().eq("key", f.key).then(function (r) { if (r.error) { toast(r.error.message, true); return; } delete values[f.key]; if (f.type === "image") { var fr = $("#pv-frame"); if (fr) fr.removeAttribute("data-src"); } toast("Vráceno na původní text."); render(); });
   }
 
   /* ---------- formuláře ---------- */
   function control(f) {
     var v = cur(f), el;
-    function set(val) { if (JSON.stringify(val) === JSON.stringify(has(f.key) ? values[f.key] : f.default)) delete pending[f.key]; else pending[f.key] = val; updateBar(); if (f.key.indexOf("banner_") === 0) bannerPreview(); }
+    function set(val) { if (JSON.stringify(val) === JSON.stringify(has(f.key) ? values[f.key] : f.default)) delete pending[f.key]; else pending[f.key] = val; updateBar(); if (f.key.indexOf("banner_") === 0) bannerPreview(); pushPreview(); }
     if (f.type === "toggle") {
-      el = h("label", { class: "switch" }, h("input", { type: "checkbox", checked: v === true || v === "true", onchange: function (e) { set(e.target.checked); } }), h("span", { class: "tr" }), h("span", { text: f.label }));
+      el = h("label", { class: "switch" }, h("input", { type: "checkbox", id: "f-" + f.key, checked: v === true || v === "true", onchange: function (e) { set(e.target.checked); } }), h("span", { class: "tr" }), h("span", { text: f.label }));
       return h("div", { class: "field" }, el, f.help ? h("small", { text: f.help }) : null);
+    }
+    if (f.type === "color") {
+      var inp = h("input", { type: "color", id: "f-" + f.key, value: /^#[0-9a-f]{6}$/i.test(v) ? v : "#d4a73f", oninput: function (e) { set(e.target.value); } });
+      var sws = ["#d4a73f", "#c62828", "#1e4fa0", "#1d8a4e", "#e8742a", "#6a3fb5"].map(function (c) { return h("button", { type: "button", class: "sw", style: "background:" + c, title: c, "aria-label": "Barva " + c, onclick: function () { inp.value = c; set(c); } }); });
+      var box = h("div", { class: "swatches" }); sws.forEach(function (b) { box.appendChild(b); }); box.appendChild(inp); box.appendChild(h("span", { class: "sw-note", text: "← vlastní barva" }));
+      return h("div", { class: "field" }, h("label", { for: inp.id, text: f.label }), box, f.help ? h("small", { text: f.help }) : null);
     }
     if (f.type === "textarea") el = h("textarea", { rows: f.rows || 3, oninput: function (e) { set(e.target.value); } }), el.value = v;
     else if (f.type === "select") { el = h("select", { onchange: function (e) { set(e.target.value); } }); f.options.forEach(function (o) { el.appendChild(h("option", { value: o[0], text: o[1], selected: o[0] === v })); }); }
@@ -104,8 +115,9 @@
   function formPanel(panel) {
     var t = TABS.filter(function (x) { return x[0] === tab; })[0];
     panel.appendChild(h("h2", { text: t[1] }));
-    var lede = { oznameni: "Lišta s oznámením se zobrazí nahoře na každé stránce – třeba sleva, výprodej nebo změna otevírací doby. Když ji vypneš, z webu zmizí.", uvod: "Texty na úvodní stránce. Fotky se mění v sekci Fotky.", onas: "Texty podstránky O nás.", zamestnanci: "Stránka je veřejná na adrese /zamestnanci/, ale není nikde na webu odkazovaná. Kdo adresu zná (nebo ji najde Google), stránku uvidí.", sluzby: "Texty podstránky Služby.", kontakt: "Telefon, e-mail, adresa, odkazy na sítě a otevírací doba – změna se projeví na celém webu najednou (i v patičce)." }[tab];
+    var lede = { oznameni: "Oznámení se zobrazí v horní liště na každé stránce – třeba sleva, výprodej nebo změna otevírací doby. Bez oznámení zůstává lišta černá s ikonami sítí a kontakty. Barvu si zvolíš sám.", uvod: "Texty na úvodní stránce. Fotky se mění v sekci Fotky.", onas: "Texty podstránky O nás.", zamestnanci: "Stránka je veřejná na adrese /zamestnanci/, ale není nikde na webu odkazovaná. Kdo adresu zná (nebo ji najde Google), stránku uvidí.", sluzby: "Texty podstránky Služby.", kontakt: "Telefon, e-mail, adresa, odkazy na sítě a otevírací doba – změna se projeví na celém webu najednou (i v patičce)." }[tab];
     if (lede) panel.appendChild(h("p", { class: "lede", text: lede }));
+    if (TABPAGE[tab]) panel.appendChild(h("p", { class: "tip", text: "💡 Vpravo je živý náhled webu. Klikni na libovolný text nebo fotku v náhledu a otevře se jeho políčko. Změny v náhledu vidíš hned, na web se dostanou po „Uložit a zveřejnit“." }));
     if (tab === "oznameni") panel.appendChild(h("div", { class: "card" }, h("h3", { text: "Náhled" }), h("div", { id: "bar-prev" })));
     var sections = []; FIELDS.filter(function (f) { return f.tab === tab; }).forEach(function (f) { if (sections.indexOf(f.section) < 0) sections.push(f.section); });
     sections.forEach(function (s) {
@@ -116,11 +128,76 @@
     });
     if (tab === "oznameni") bannerPreview();
   }
+  function textOn(hex) {
+    var m = /^#?([0-9a-f]{6})$/i.exec(hex || ""); if (!m) return "#fff";
+    var n = parseInt(m[1], 16), c = [n >> 16 & 255, n >> 8 & 255, n & 255].map(function (v) { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); });
+    return (.2126 * c[0] + .7152 * c[1] + .0722 * c[2]) > .4 ? "#0a1020" : "#ffffff";
+  }
   function bannerPreview() {
     var box = $("#bar-prev"); if (!box) return; box.innerHTML = "";
-    var on = cur(byKey.banner_on), text = String(cur(byKey.banner_text) || "").trim(), style = cur(byKey.banner_style), link = String(cur(byKey.banner_link) || "").trim(), label = cur(byKey.banner_link_label) || "Více informací";
-    if (!on || !text) { box.appendChild(h("div", { class: "prev-off", text: !on ? "Lišta je vypnutá – na webu není vidět." : "Lišta je zapnutá, ale chybí text – na webu se nezobrazí." })); return; }
-    box.appendChild(h("div", { class: "prev-bar " + style }, h("span", { text: text }), link ? h("a", { href: "#", onclick: function (e) { e.preventDefault(); }, text: label }) : null));
+    var on = cur(byKey.banner_on), text = String(cur(byKey.banner_text) || "").trim(), color = cur(byKey.banner_color), link = String(cur(byKey.banner_link) || "").trim(), label = cur(byKey.banner_link_label) || "Více informací";
+    if (!on || !text) { box.appendChild(h("div", { class: "prev-off", text: !on ? "Oznámení je vypnuté – horní lišta na webu zůstává černá." : "Oznámení je zapnuté, ale chybí text – na webu se nezobrazí." })); return; }
+    box.appendChild(h("div", { class: "prev-bar", style: "background:" + color + ";color:" + textOn(color) }, h("span", { text: text }), link ? h("a", { href: "#", onclick: function (e) { e.preventDefault(); }, text: label }) : null));
+  }
+
+  /* ---------- živý náhled webu ---------- */
+  function buildPv() {
+    if (pvBuilt) return; pvBuilt = true;
+    var pv = $("#pv"), head = $(".pv-pages", pv), frame = $("#pv-frame");
+    PAGES.forEach(function (p) { head.appendChild(h("button", { type: "button", "data-p": p[0], onclick: function () { setPage(p[0]); }, text: p[1] })); });
+    $(".pv-dev", pv).addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; pvDev = b.dataset.d; layoutPv(); });
+    frame.addEventListener("load", function () { pushPreview(true); });
+    if (window.ResizeObserver) new ResizeObserver(layoutPv).observe($(".pv-stage", pv)); else window.addEventListener("resize", layoutPv);
+    window.addEventListener("message", function (e) {
+      if (e.origin !== location.origin || e.source !== frame.contentWindow) return; var d = e.data || {};
+      if (d.type === "gx-ready") { pvReady = true; pushPreview(true); }
+      else if (d.type === "gx-focus") focusKey(d.key);
+    });
+    $("#app").addEventListener("focusin", function (e) { var id = e.target && e.target.id; if (id && id.indexOf("f-") === 0) showInPv(id.slice(2)); });
+  }
+  function setPage(p) { pvPage = p; updatePv(); }
+  function updatePv() {
+    var on = !!TABPAGE[tab], pv = $("#pv"); document.body.classList.toggle("has-pv", on); pv.hidden = !on;
+    if (!on) { document.body.classList.remove("pv-open"); return; }
+    buildPv();
+    Array.prototype.forEach.call($(".pv-pages", pv).children, function (b) { b.classList.toggle("on", b.dataset.p === pvPage); });
+    Array.prototype.forEach.call($(".pv-dev", pv).children, function (b) { b.classList.toggle("on", b.dataset.d === pvDev); });
+    var url = PAGES.filter(function (p) { return p[0] === pvPage; })[0][2] + "?gxprev=1", frame = $("#pv-frame");
+    if (frame.getAttribute("data-src") !== url) { pvReady = false; frame.setAttribute("data-src", url); frame.src = url; }
+    layoutPv(); pushPreview();
+  }
+  function layoutPv() {
+    var stage = $(".pv-stage"), frame = $("#pv-frame"); if (!stage || !stage.clientWidth) return;
+    var dw = pvDev === "mob" ? 390 : 1280, W = stage.clientWidth, H = stage.clientHeight, sc = Math.min(1, W / dw);
+    frame.style.width = dw + "px"; frame.style.height = Math.ceil(H / sc) + "px"; frame.style.transform = "scale(" + sc + ")";
+    frame.style.left = Math.max(0, (W - dw * sc) / 2) + "px";
+    Array.prototype.forEach.call($(".pv-dev").children, function (b) { b.classList.toggle("on", b.dataset.d === pvDev); });
+  }
+  function previewData() {
+    var m = {}, labels = {};
+    FIELDS.forEach(function (f) {
+      var v = cur(f);
+      if (f.type === "image") { if (/^https?:/.test(v)) m[f.key] = v; }
+      else m[f.key] = v;
+      labels[f.key] = /^hours_/.test(f.key) && f.key !== "hours_note" ? "Otevírací doba – " + f.label : (f.section && f.section !== f.label ? f.section + " – " + f.label : f.label);
+    });
+    return { type: "gx-content", content: m, labels: labels };
+  }
+  function pushPreview(now) {
+    clearTimeout(pvTimer);
+    function go() { var fr = $("#pv-frame"); if (!fr || !fr.contentWindow || !pvReady) return; fr.contentWindow.postMessage(previewData(), location.origin); }
+    if (now) go(); else pvTimer = setTimeout(go, 120);
+  }
+  function showInPv(key) { var fr = $("#pv-frame"); if (fr && fr.contentWindow && pvReady) fr.contentWindow.postMessage({ type: "gx-show", key: key }, location.origin); }
+  function focusKey(key) {
+    var f = byKey[key]; if (!f) { toast("Tento prvek se upravuje jinde."); return; }
+    if (f.tab !== tab) { tab = f.tab; render(); }
+    setTimeout(function () {
+      var el = f.type === "image" ? $('.photo[data-k="' + key + '"]') : $("#f-" + key); if (!el) return;
+      var box = f.type === "image" ? el : (el.closest(".field") || el);
+      box.scrollIntoView({ behavior: "smooth", block: "center" }); box.classList.remove("flash"); void box.offsetWidth; box.classList.add("flash");
+      if (f.type !== "image" && el.focus) el.focus({ preventScroll: true });
+    }, 60);
   }
 
   /* ---------- fotky ---------- */
@@ -130,7 +207,7 @@
     var grid = h("div", { class: "photos" });
     FIELDS.filter(function (f) { return f.type === "image"; }).forEach(function (f) {
       var v = cur(f), custom = has(f.key), input = h("input", { type: "file", accept: "image/*", hidden: true });
-      var card = h("div", { class: "photo" }, h("div", { class: "im", style: "background-image:url('" + imgSrc(v) + "')" }, custom ? h("span", { text: "Vlastní" }) : null),
+      var card = h("div", { class: "photo", "data-k": f.key }, h("div", { class: "im", style: "background-image:url('" + imgSrc(v) + "')" }, custom ? h("span", { text: "Vlastní" }) : null),
         h("div", { class: "bd" }, h("b", { text: f.label }), h("div", { class: "acts" },
           h("button", { class: "btn small primary", onclick: function () { input.click(); }, text: "Nahrát novou" }),
           custom ? h("button", { class: "btn small", onclick: function () { resetField(f); }, text: "Vrátit původní" }) : null), input));
