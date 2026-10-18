@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://filipfabian922.github.io/galaxie-web/</loc><changefreq>monthly</changefreq></url>
-  <url><loc>https://filipfabian922.github.io/galaxie-web/o-nas/</loc><changefreq>monthly</changefreq></url>
-  <url><loc>https://filipfabian922.github.io/galaxie-web/sluzby/</loc><changefreq>monthly</changefreq></url>
-  <url><loc>https://filipfabian922.github.io/galaxie-web/kontakt/</loc><changefreq>monthly</changefreq></url>
-  <url><loc>https://filipfabian922.github.io/galaxie-web/ochrana-osobnich-udaju/</loc><changefreq>monthly</changefreq></url>
-  <url><loc>https://filipfabian922.github.io/galaxie-web/zamestnanci/</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://galaxiebazar.cz/</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://galaxiebazar.cz/o-nas/</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://galaxiebazar.cz/sluzby/</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://galaxiebazar.cz/kontakt/</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://galaxiebazar.cz/ochrana-osobnich-udaju/</loc><changefreq>monthly</changefreq></url>
 </urlset>
