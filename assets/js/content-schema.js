@@ -29,6 +29,62 @@ window.GALAXIE_SCHEMA = {
    "help": "Když není oznámení zapnuté, lišta zůstane černá. Barva textu se přizpůsobí sama."
   },
   {
+   "key": "status_mode",
+   "label": "Co ukazovat",
+   "type": "select",
+   "default": "auto",
+   "tab": "oznameni",
+   "section": "Stav „otevřeno / zavřeno“ na úvodní stránce",
+   "options": [
+    [
+     "auto",
+     "Automaticky podle otevírací doby"
+    ],
+    [
+     "open",
+     "Ručně: otevřeno"
+    ],
+    [
+     "closed",
+     "Ručně: zavřeno"
+    ],
+    [
+     "hide",
+     "Nezobrazovat nic"
+    ]
+   ],
+   "help": "Pro výjimky (zkrácená doba, dovolená, nemoc). Nastavení platí jen v zadaném rozsahu níže."
+  },
+  {
+   "key": "status_text",
+   "label": "Vlastní text (nepovinné)",
+   "type": "text",
+   "default": "",
+   "tab": "oznameni",
+   "section": "Stav „otevřeno / zavřeno“ na úvodní stránce",
+   "ph": "např. Dnes otevřeno jen do 12:00",
+   "help": "Když necháte prázdné, ukáže se jen „Právě otevřeno“ nebo „Zavřeno“."
+  },
+  {
+   "key": "status_scope",
+   "label": "Jak dlouho to platí",
+   "type": "select",
+   "default": "today",
+   "tab": "oznameni",
+   "section": "Stav „otevřeno / zavřeno“ na úvodní stránce",
+   "options": [
+    [
+     "today",
+     "Jen dnes (ve 24:00 se vrátí automatika)"
+    ],
+    [
+     "forever",
+     "Do odvolání"
+    ]
+   ],
+   "help": "Doporučeno „Jen dnes“, ať na to nezapomenete."
+  },
+  {
    "key": "banner_link",
    "label": "Odkaz (nepovinné)",
    "type": "url",

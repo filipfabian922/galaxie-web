@@ -32,6 +32,7 @@
   var DAYS = [["po", "Pondělí"], ["ut", "Úterý"], ["st", "Středa"], ["ct", "Čtvrtek"], ["pa", "Pátek"], ["so", "Sobota"], ["ne", "Neděle"]];
   var content = {};
 
+  var stamps = {};
   function has(k) { return Object.prototype.hasOwnProperty.call(content, k) && content[k] !== null; }
 
   function applyContent() {
@@ -99,6 +100,13 @@
       var today = ranges(map[DAYS[now.day][0]]), open = null;
       today.forEach(function (r) { if (now.min >= r[0] && now.min < r[1]) open = r; });
       el.classList.remove("is-open", "is-closed");
+      var mode = has("status_mode") ? content.status_mode : "auto", custom = has("status_text") ? String(content.status_text).trim() : "";
+      if (mode !== "auto" && (has("status_scope") ? content.status_scope : "today") === "today") {
+        var st = ["status_mode", "status_text", "status_scope"].map(function (k) { return stamps[k] ? new Date(stamps[k]) : null; }).filter(Boolean).sort(function (a, b) { return b - a; })[0];
+        if (st) { var f = function (d) { return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Prague" }).format(d); }; if (f(st) !== f(new Date())) mode = "auto"; }
+      }
+      if (mode === "hide") { el.textContent = ""; return; }
+      if (mode === "open" || mode === "closed") { el.classList.add(mode === "open" ? "is-open" : "is-closed"); el.textContent = custom || (mode === "open" ? "Právě otevřeno" : "Zavřeno"); return; }
       if (open) { el.classList.add("is-open"); el.textContent = "Právě otevřeno · do " + fmt(open[1]); return; }
       var next = today.filter(function (r) { return r[0] > now.min; })[0];
       el.classList.add("is-closed");
@@ -140,9 +148,9 @@
   /* ---------- načtení dat ---------- */
   function load() {
     if (!CFG.SUPABASE_URL) return Promise.resolve();
-    return fetch(CFG.SUPABASE_URL + "/rest/v1/site_content?select=key,value", { headers: { apikey: CFG.SUPABASE_KEY } })
+    return fetch(CFG.SUPABASE_URL + "/rest/v1/site_content?select=key,value,updated_at", { headers: { apikey: CFG.SUPABASE_KEY } })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (rows) { rows.forEach(function (r) { content[r.key] = r.value; }); window.GALAXIE_CONTENT = content; })
+      .then(function (rows) { var T = {}; rows.forEach(function (r) { content[r.key] = r.value; T[r.key] = r.updated_at; }); stamps = T; window.GALAXIE_CONTENT = content; })
       .catch(function () { /* web funguje i bez databáze – zůstanou výchozí texty */ });
   }
 
