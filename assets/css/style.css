@@ -453,3 +453,15 @@ html{overflow-x:clip}
 .hours .row.today b{color:var(--gold-d);font-weight:800}
 .hours .row.today b::after{content:none;display:none}
 .ftr .hours .row.today b{color:var(--gold-2)}
+
+/* ===== větší texty (říjen) ===== */
+.eyebrow{font-size:1.5rem;letter-spacing:.12em;margin-bottom:16px}
+.nav a{font-size:1.1rem}
+.brand small{font-size:1.1rem}
+.strip{font-size:1.1rem}
+.strip .contact svg,.strip.has-ann .contact svg{width:20px;height:20px}
+.strip .ann{font-size:1.1rem}
+@media (max-width:900px){.eyebrow{font-size:1.2rem}}
+@media (max-width:560px){.eyebrow{font-size:1.05rem;letter-spacing:.08em}.strip{font-size:.95rem}.strip .ann{font-size:.95rem}.nav a{font-size:1.15rem}}
+.nav a,.nav .btn{white-space:nowrap}
+@media (min-width:821px) and (max-width:1180px){.brand small{display:none}.nav a{padding:10px 10px}}
