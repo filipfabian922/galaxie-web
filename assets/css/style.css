@@ -465,3 +465,6 @@ html{overflow-x:clip}
 @media (max-width:560px){.eyebrow{font-size:1.05rem;letter-spacing:.08em}.strip{font-size:.95rem}.strip .ann{font-size:.95rem}.nav a{font-size:1.15rem}}
 .nav a,.nav .btn{white-space:nowrap}
 @media (min-width:821px) and (max-width:1180px){.brand small{display:none}.nav a{padding:10px 10px}}
+
+/* ===== přepínač jazyka CZ/SK v horní liště ===== */
+.strip .social a.lang{width:auto;min-width:38px;padding:0 10px;border-radius:999px;font-weight:800;font-size:.9rem;letter-spacing:.06em;text-decoration:none;display:grid;place-items:center}

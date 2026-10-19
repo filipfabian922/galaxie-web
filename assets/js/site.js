@@ -29,7 +29,13 @@
   }
 
   /* ---------- obsah z databáze ---------- */
-  var DAYS = [["po", "Pondělí"], ["ut", "Úterý"], ["st", "Středa"], ["ct", "Čtvrtek"], ["pa", "Pátek"], ["so", "Sobota"], ["ne", "Neděle"]];
+  var SK = document.documentElement.lang === "sk";
+  function kk(k) { return SK ? "sk_" + k : k; }
+  var DAYS = SK ? [["po", "Pondelok"], ["ut", "Utorok"], ["st", "Streda"], ["ct", "Štvrtok"], ["pa", "Piatok"], ["so", "Sobota"], ["ne", "Nedeľa"]]
+    : [["po", "Pondělí"], ["ut", "Úterý"], ["st", "Středa"], ["ct", "Čtvrtek"], ["pa", "Pátek"], ["so", "Sobota"], ["ne", "Neděle"]];
+  var DAYS_ON = SK ? ["v pondelok", "v utorok", "v stredu", "vo štvrtok", "v piatok", "v sobotu", "v nedeľu"] : ["v pondělí", "v úterý", "ve středu", "ve čtvrtek", "v pátek", "v sobotu", "v neděli"];
+  var TXT = SK ? { open: "Práve otvorené", openTo: "Práve otvorené · do ", closed: "Zatvorené", closedToday: "Zatvorené · dnes otvárame o ", closedTomorrow: "Zatvorené · otvárame zajtra o ", closedDay: "Zatvorené · otvárame ", more: "Viac informácií", close: "Zavrieť oznámenie" }
+    : { open: "Právě otevřeno", openTo: "Právě otevřeno · do ", closed: "Zavřeno", closedToday: "Zavřeno · dnes otevíráme v ", closedTomorrow: "Zavřeno · otevíráme zítra v ", closedDay: "Zavřeno · otevíráme ", more: "Více informací", close: "Zavřít oznámení" };
   var content = {};
 
   var stamps = {};
@@ -57,7 +63,7 @@
       var q = has("map_query") ? content.map_query : el.dataset.default;
       el.src = "https://www.google.com/maps?q=" + encodeURIComponent(q) + "&hl=cs&z=16&output=embed";
     });
-    $$("[data-c-gdpr]").forEach(function (el) { if (has("gdpr_operator")) el.textContent = content.gdpr_operator; });
+    $$("[data-c-gdpr]").forEach(function (el) { if (has(kk("gdpr_operator"))) el.textContent = content[kk("gdpr_operator")]; });
     renderHours();
     stats();
   }
@@ -95,27 +101,27 @@
         return '<div class="row' + (now.day === i ? " today" : "") + '" data-k="hours_' + d[0] + '"><b>' + esc(d[1]) + "</b>" + cells + "</div>";
       }).join("");
     });
-    $$("[data-hours-note]").forEach(function (el) { el.textContent = has("hours_note") ? content.hours_note : ""; });
+    $$("[data-hours-note]").forEach(function (el) { el.textContent = has(kk("hours_note")) ? content[kk("hours_note")] : ""; });
     $$("[data-open-badge]").forEach(function (el) {
       var today = ranges(map[DAYS[now.day][0]]), open = null;
       today.forEach(function (r) { if (now.min >= r[0] && now.min < r[1]) open = r; });
       el.classList.remove("is-open", "is-closed");
-      var mode = has("status_mode") ? content.status_mode : "auto", custom = has("status_text") ? String(content.status_text).trim() : "";
+      var mode = has("status_mode") ? content.status_mode : "auto", custom = has(kk("status_text")) ? String(content[kk("status_text")]).trim() : "";
       if (mode !== "auto" && (has("status_scope") ? content.status_scope : "today") === "today") {
         var st = ["status_mode", "status_text", "status_scope"].map(function (k) { return stamps[k] ? new Date(stamps[k]) : null; }).filter(Boolean).sort(function (a, b) { return b - a; })[0];
         if (st) { var f = function (d) { return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Prague" }).format(d); }; if (f(st) !== f(new Date())) mode = "auto"; }
       }
       if (mode === "hide") { el.textContent = ""; return; }
-      if (mode === "open" || mode === "closed") { el.classList.add(mode === "open" ? "is-open" : "is-closed"); el.textContent = custom || (mode === "open" ? "Právě otevřeno" : "Zavřeno"); return; }
-      if (open) { el.classList.add("is-open"); el.textContent = "Právě otevřeno · do " + fmt(open[1]); return; }
+      if (mode === "open" || mode === "closed") { el.classList.add(mode === "open" ? "is-open" : "is-closed"); el.textContent = custom || (mode === "open" ? TXT.open : TXT.closed); return; }
+      if (open) { el.classList.add("is-open"); el.textContent = TXT.openTo + fmt(open[1]); return; }
       var next = today.filter(function (r) { return r[0] > now.min; })[0];
       el.classList.add("is-closed");
-      if (next) { el.textContent = "Zavřeno · dnes otevíráme v " + fmt(next[0]); return; }
+      if (next) { el.textContent = TXT.closedToday + fmt(next[0]); return; }
       for (var i = 1; i <= 7; i++) {
         var di = (now.day + i) % 7, rr = ranges(map[DAYS[di][0]]);
-        if (rr.length) { el.textContent = "Zavřeno · otevíráme " + (i === 1 ? "zítra" : "v " + DAYS[di][1].toLowerCase().replace(/^(úterý)$/, "úterý")) + " v " + fmt(rr[0][0]); return; }
+        if (rr.length) { el.textContent = (i === 1 ? TXT.closedTomorrow : TXT.closedDay + DAYS_ON[di] + " " + (SK ? "o " : "v ")) + fmt(rr[0][0]); return; }
       }
-      el.textContent = "Zavřeno";
+      el.textContent = TXT.closed;
     });
   }
 
@@ -130,7 +136,7 @@
     var el = $("#announce"), strip = $("#strip"); if (!el || !strip) return;
     function off() { strip.classList.remove("has-ann"); strip.style.removeProperty("--ann-bg"); strip.style.removeProperty("--ann-fg"); el.hidden = true; el.innerHTML = ""; }
     var on = content.banner_on === true || content.banner_on === "true";
-    var text = has("banner_text") ? String(content.banner_text).trim() : "";
+    var text = has(kk("banner_text")) ? String(content[kk("banner_text")]).trim() : "";
     if (!on || !text) { off(); return; }
     var key = "gal-ann-" + text.length + text.charCodeAt(0) + text.charCodeAt(text.length - 1), closed = false;
     if (!PREVIEW) { try { closed = sessionStorage.getItem(key) === "1"; } catch (e) {} }
@@ -138,8 +144,8 @@
     var color = has("banner_color") && /^#[0-9a-f]{6}$/i.test(content.banner_color) ? content.banner_color : (LEGACY[content.banner_style] || "#d4a73f");
     strip.style.setProperty("--ann-bg", color); strip.style.setProperty("--ann-fg", textOn(color));
     var link = has("banner_link") ? safeUrl(content.banner_link) : "";
-    var label = has("banner_link_label") && content.banner_link_label ? content.banner_link_label : "Více informací";
-    el.innerHTML = "<span></span>" + (link ? '<a href="' + esc(link) + '">' + esc(label) + "</a>" : "") + '<button type="button" aria-label="Zavřít oznámení">×</button>';
+    var label = has(kk("banner_link_label")) && content[kk("banner_link_label")] ? content[kk("banner_link_label")] : TXT.more;
+    el.innerHTML = "<span></span>" + (link ? '<a href="' + esc(link) + '">' + esc(label) + "</a>" : "") + '<button type="button" aria-label="' + TXT.close + '">×</button>';
     el.firstChild.textContent = text;
     el.hidden = false; strip.classList.add("has-ann");
     el.querySelector("button").onclick = function () { off(); if (!PREVIEW) try { sessionStorage.setItem(key, "1"); } catch (e) {} };
@@ -213,7 +219,7 @@
     var SEL = "[data-k],[data-c],[data-c-p],[data-c-list],[data-c-img],[data-c-href],[data-hours-note],[data-c-map],[data-c-gdpr],[data-c-staff],[data-hours]";
     function keyOf(n) {
       return n.getAttribute("data-k") || n.dataset.c || n.dataset.cP || n.dataset.cList || n.dataset.cImg || n.dataset.cHref ||
-        (n.hasAttribute("data-hours-note") ? "hours_note" : n.hasAttribute("data-c-map") ? "map_query" : n.hasAttribute("data-c-gdpr") ? "gdpr_operator" : n.hasAttribute("data-c-staff") ? "zam_body" : n.hasAttribute("data-hours") ? "hours_po" : "");
+        (n.hasAttribute("data-hours-note") ? kk("hours_note") : n.hasAttribute("data-c-map") ? "map_query" : n.hasAttribute("data-c-gdpr") ? kk("gdpr_operator") : n.hasAttribute("data-c-staff") ? "zam_body" : n.hasAttribute("data-hours") ? "hours_po" : "");
     }
     function clearHover() { if (hov) hov.classList.remove("gx-hover"); hov = null; tip.style.display = "none"; }
     document.addEventListener("mouseover", function (e) {
@@ -228,15 +234,15 @@
       var n = e.target.closest ? e.target.closest(SEL) : null; if (!n) return; var k = keyOf(n); if (k) parent.postMessage({ type: "gx-focus", key: k }, location.origin);
     }, true);
     function findEl(k) {
-      if (/^banner_/.test(k)) return $("#strip");
-      var q = k === "hours_note" ? "[data-hours-note]" : k === "map_query" ? "[data-c-map]" : k === "gdpr_operator" ? "[data-c-gdpr]" : k === "zam_body" ? "[data-c-staff]" : null;
+      if (/^(sk_)?banner_/.test(k)) return $("#strip");
+      var q = k === kk("hours_note") ? "[data-hours-note]" : k === "map_query" ? "[data-c-map]" : k === kk("gdpr_operator") ? "[data-c-gdpr]" : k === "zam_body" ? "[data-c-staff]" : null;
       var sels = [q, '[data-k="' + k + '"]', '[data-c="' + k + '"]', '[data-c-p="' + k + '"]', '[data-c-list="' + k + '"]', '[data-c-img="' + k + '"]', '[data-c-href="' + k + '"]', /^hours_/.test(k) ? "[data-hours]" : null];
       for (var i = 0; i < sels.length; i++) { if (!sels[i]) continue; var el = $(sels[i]); if (el) return el; }
       return null;
     }
     function show(k) {
       var el = findEl(k); if (!el) return;
-      el.scrollIntoView({ behavior: "smooth", block: /^banner_/.test(k) ? "start" : "center" });
+      el.scrollIntoView({ behavior: "smooth", block: /^(sk_)?banner_/.test(k) ? "start" : "center" });
       el.classList.remove("gx-flash"); void el.offsetWidth; el.classList.add("gx-flash"); setTimeout(function () { el.classList.remove("gx-flash"); }, 1800);
     }
     window.addEventListener("message", function (e) {

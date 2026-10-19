@@ -6,8 +6,8 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var app = $("#app"), loginBox = $("#login");
   var values = {}, pending = {}, tab = "prehled", user = null, statDays = 30, chart = null;
-  var PAGES = [["home", "Úvod", "../"], ["onas", "O nás", "../o-nas/"], ["sluzby", "Služby", "../sluzby/"], ["kontakt", "Kontakt", "../kontakt/"], ["zam", "Zaměstnanci", "../zamestnanci/"]];
-  var TABPAGE = { oznameni: "home", uvod: "home", onas: "onas", sluzby: "sluzby", kontakt: "kontakt", fotky: "home", zamestnanci: "zam" };
+  var PAGES = [["home", "Úvod", "../"], ["onas", "O nás", "../o-nas/"], ["sluzby", "Služby", "../sluzby/"], ["kontakt", "Kontakt", "../kontakt/"], ["zam", "Zaměstnanci", "../zamestnanci/"], ["sk", "SK Úvod", "../sk/"], ["skonas", "SK O nás", "../sk/o-nas/"], ["sksl", "SK Služby", "../sk/sluzby/"], ["skkt", "SK Kontakt", "../sk/kontakt/"], ["skzam", "SK Zaměstnanci", "../sk/zamestnanci/"]];
+  var TABPAGE = { oznameni: "home", uvod: "home", onas: "onas", sluzby: "sluzby", kontakt: "kontakt", fotky: "home", zamestnanci: "zam", sk: "sk" };
   var pvPage = "home", pvDev = "desk", pvReady = false, pvTimer = null, pvBuilt = false;
   var byKey = {}; FIELDS.forEach(function (f) { byKey[f.key] = f; });
 
